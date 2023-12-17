@@ -3,15 +3,24 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
+
 	openai "github.com/sashabaranov/go-openai"
 	"github.com/uptrace/bun"
+
+	//Import env package
+	"github.com/joho/godotenv"
 )
 
-const openAIKey = OPENAI_API_KEY // Replace with your actual API key
-
 func summarizeArticles(ctx context.Context, db *bun.DB) error {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+	openAIKey := os.Getenv("OPENAI_KEY")
 	articles := make([]Article, 0)
-	err := db.NewSelect().Model(&articles).Where("summarized = false").Limit(5).OrderExpr("published_at DESC").Scan(ctx)
+	err = db.NewSelect().Model(&articles).Where("summarized = false").Limit(5).OrderExpr("published_at DESC").Scan(ctx)
 	if err != nil {
 		return err
 	}
